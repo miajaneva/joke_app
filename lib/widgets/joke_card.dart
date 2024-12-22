@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 class JokeCard extends StatelessWidget {
-  final String title;
+  final String type;
   final VoidCallback onTap;
 
-  const JokeCard({super.key, required this.title, required this.onTap});
+  JokeCard({required this.type, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(8.0),
+      margin: EdgeInsets.all(8.0),
       child: ListTile(
-        title: Text(title, style: const TextStyle(fontSize: 18)),
+        title: Text(type, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        trailing: Icon(Icons.arrow_forward),
         onTap: onTap,
       ),
     );

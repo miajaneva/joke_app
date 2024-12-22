@@ -1,67 +1,53 @@
 import 'package:flutter/material.dart';
 import '../services/api_services.dart';
-import '../widgets/joke_card.dart';
-import 'joke_type_screen.dart';
-import 'random_joke_screen.dart';
+import 'jokes_by_type_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<String>> jokeTypes;
-
-  @override
-  void initState() {
-    super.initState();
-    jokeTypes = ApiService.fetchJokeTypes();
-  }
-
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Joke Types"),
+        title: Text('Joke Types'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.lightbulb),
-            onPressed: () {
+            icon: Icon(Icons.shuffle),
+            onPressed: () async {
+              final joke = await ApiService.getRandomJoke();
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const RandomJokeScreen()),
+                MaterialPageRoute(
+                  builder: (context) => RandomJokeScreen(joke: joke),
+                ),
               );
             },
           ),
         ],
       ),
       body: FutureBuilder<List<String>>(
-        future: jokeTypes,
+        future: ApiService.getJokeTypes(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (snapshot.hasData) {
-            return ListView(
-              children: snapshot.data!
-                  .map((type) => JokeCard(
-                title: type,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => JokeTypeScreen(type: type),
-                    ),
-                  );
-                },
-              ))
-                  .toList(),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return const Center(child: Text("No data found"));
+            final types = snapshot.data!;
+            return ListView.builder(
+              itemCount: types.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(types[index]),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => JokesByTypeScreen(type: types[index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
           }
         },
       ),
